@@ -25,8 +25,10 @@
       <input type="text" id="secret" name="secret"><br><br>
       <label for="salt">Salt: </label>
       <input type="text" id="salt" name="salt"><br><br>
-      <label for="salt">Use webp as output format: </label>
-      <input type="checkbox" id="webp" name="webp"><br><br>
+      <label for="salt">Specify output format:</label>
+      <input type="checkbox" id="useformat" name="useformat" onclick="toggleFormat()"><br><br>
+      <label for="format" id="formatlabel" hidden="true">Output format: </label>
+      <input type="text" id="format" name="format" hidden="true"><br><br>
       <label for="options">Options: </label><br><br>
       <textarea id="options" name="options" rows="10" cols="40">{
   "rs": {
@@ -41,6 +43,11 @@
     <button id="copy" hidden="true" onclick="copyToClipBoard()">Copy text</button>
 
     <script>
+      function toggleFormat() {
+        document.getElementById("format").hidden = !document.getElementById("format").hidden
+        document.getElementById("formatlabel").hidden = !document.getElementById("formatlabel").hidden
+      }
+
       function restoreButton() {
         document.getElementById("copy").innerText = "Copy text"
       }
@@ -85,8 +92,8 @@
         secret = document.getElementById("secret").value
         salt = document.getElementById("salt").value
         options = JSON.parse(document.getElementById("options").value.toString())
-        webp = document.getElementById("webp").checked ? "webp" : ""
-        encodeUrl(url, options, secret, salt, webp)
+        format = document.getElementById("useformat").checked ? document.getElementById("format").value : ""
+        encodeUrl(url, options, secret, salt, format)
           .then(res => {
             document.getElementById("result").innerHTML = res
             document.getElementById("copy").hidden = false
@@ -102,17 +109,9 @@
     }
 
 
-    const encodeUrl = async (url, options, key, salt, extension='webp') => {
+    const encodeUrl = async (url, options, key, salt, extension='') => {
       const encodedOptions = encodeOptions(options)
-      const encodedUrl = `${encodedOptions}/${urlSafeBase64(url)}`
-      if (extension.length != 0) {
-        const encodedUrl = `${encodedOptions}/${urlSafeBase64(url)}.${extension}`
-        const signature = (await generateSignature(encodedUrl, key, salt))
-          .replace(/\+/g, '-') // Convert '+' to '-'
-          .replace(/\//g, '_') // Convert '/' to '_'
-          .replace(/=+$/, ''); // Remove ending '='
-        return `${signature}${encodedUrl}`
-      }
+      const encodedUrl = `${encodedOptions}/${urlSafeBase64(url)}${extension ? "."+extension : ""}`
       const signature = (await generateSignature(encodedUrl, key, salt))        
         .replace(/\+/g, '-') // Convert '+' to '-'
         .replace(/\//g, '_') // Convert '/' to '_'
