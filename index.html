@@ -48,14 +48,14 @@
   }
 }
       </textarea><br>
-      <p>
-        <a href="https://docs.imgproxy.net/generating_the_url">imgproxy docs</href>
-      </p>
       <input type="button" onclick="encode()" value="Submit">
     </form>
     <p id="result"></p>
     <button id="copy" hidden="true" onclick="copyToClipBoard()">Copy text</button>
 
+    <footer>
+      <a href="https://docs.imgproxy.net/generating_the_url">imgproxy docs</href>
+    </footer>
     <script>
       function toggleFormat() {
         document.getElementById("format").hidden = !document.getElementById("format").hidden;
