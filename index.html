@@ -23,25 +23,34 @@
   <body>
     <h1>Imgproxy Signature Generator</h1>
     <form id="data">
-      <label for="url">Image URL: </label>
+      <label for="url">Image URL:
+      </label>
       <input type="text" id="url" name="url" size="80"><br><br>
-      <label for="secret">Secret key: </label>
+      <label for="secret">Secret key:
+      </label>
       <input type="text" id="secret" name="secret"><br><br>
-      <label for="salt">Salt: </label>
+      <label for="salt">Salt:
+      </label>
       <input type="text" id="salt" name="salt"><br><br>
       <label for="salt">Specify output format:</label>
       <input type="checkbox" id="useformat" name="useformat" onclick="toggleFormat()"><br><br>
-      <label for="format" id="formatlabel" hidden="true">Output format: </label>
+      <label for="format" id="formatlabel" hidden="true">Output format:
+      </label>
       <input type="text" id="format" name="format" hidden="true"><br><br>
-      <label for="options">Options: </label><br><br>
-      <textarea id="options" name="options" rows="10" cols="40">{
+      <label for="options">Options:
+      </label><br><br>
+      <textarea id="options" name="options" rows="10" cols="40">
+{
   "rs": {
     "resizing_type": "fill",
     "width": 64,
     "height": 64
   }
-}</textarea><br>
-    <p><a href="https://docs.imgproxy.net/generating_the_url">imgproxy docs</href></p>
+}
+      </textarea><br>
+      <p>
+        <a href="https://docs.imgproxy.net/generating_the_url">imgproxy docs</href>
+      </p>
       <input type="button" onclick="encode()" value="Submit">
     </form>
     <p id="result"></p>
@@ -49,92 +58,92 @@
 
     <script>
       function toggleFormat() {
-        document.getElementById("format").hidden = !document.getElementById("format").hidden
-        document.getElementById("formatlabel").hidden = !document.getElementById("formatlabel").hidden
+        document.getElementById("format").hidden = !document.getElementById("format").hidden;
+        document.getElementById("formatlabel").hidden = !document.getElementById("formatlabel").hidden;
       }
 
       function restoreButton() {
-        document.getElementById("copy").innerText = "Copy text"
-      }
-      function copyToClipBoard() {
-        var copyText = document.getElementById("result");
-        console.log(copyText.innerText)
-        navigator.clipboard.writeText(copyText.innerText);
-        document.getElementById("copy").innerText = "Copied to clipboard!"
-        setTimeout(restoreButton, 1000)
+        document.getElementById("copy").innerText = "Copy text";
       }
 
+      function copyToClipBoard() {
+        var copyText = document.getElementById("result");
+        navigator.clipboard.writeText(copyText.innerText);
+        document.getElementById("copy").innerText = "Copied to clipboard!";
+        setTimeout(restoreButton, 1000);
+      }
 
 
       async function HMAC(key, salt, message) {
         const g = str => new Uint8Array([...unescape(encodeURIComponent(str))].map(c => c.charCodeAt(0))),
-        k = g(key),
-        m = g(salt+message),
-        c = await crypto.subtle.importKey('raw', k, { name: 'HMAC', hash: 'SHA-256' },true, ['sign']),
-        s = await crypto.subtle.sign('HMAC', c, m);
+          k = g(key),
+          m = g(salt + message),
+          c = await crypto.subtle.importKey('raw', k, {
+            name: 'HMAC',
+            hash: 'SHA-256'
+          }, true, ['sign']),
+          s = await crypto.subtle.sign('HMAC', c, m);
         [...new Uint8Array(s)].map(b => b.toString(16).padStart(2, '0')).join('');
         return btoa(String.fromCharCode(...new Uint8Array(s)))
       }
 
-      const generateSignature = async (str, key, salt, signatureSize=32) => {
-        expectedMAC = await HMAC(key, salt, str)
+      const generateSignature = async (str, key, salt, signatureSize = 32) => {
+        expectedMAC = await HMAC(key, salt, str);
         if (signatureSize < 32) {
-          return expectedMAC.slice(0, signatureSize)
+          return expectedMAC.slice(0, signatureSize);
         }
         return expectedMAC
       }
 
-    const urlSafeBase64 = (url) => {
-      return window.btoa(unescape(encodeURIComponent(url)))
-        .replace(/\+/g, '-') // Convert '+' to '-'
-        .replace(/\//g, '_') // Convert '/' to '_'
-        .replace(/=+$/, ''); // Remove ending '='
-    }
-
-    function encode() {
-      try {
-        url = document.getElementById("url").value
-        secret = document.getElementById("secret").value
-        salt = document.getElementById("salt").value
-        options = JSON.parse(document.getElementById("options").value.toString())
-        format = document.getElementById("useformat").checked ? document.getElementById("format").value : ""
-        encodeUrl(url, options, secret, salt, format)
-          .then(res => {
-            document.getElementById("result").innerHTML = res
-            document.getElementById("copy").hidden = false
-          })
-          .catch(err => {
-            document.getElementById("result").innerHTML = err
-            console.log(err)
-          })
-      } catch (err) {
-        document.getElementById("result").innerHTML = err;
-        console.log(err)
+      const urlSafeBase64 = (url) => {
+        return window.btoa(unescape(encodeURIComponent(url))).replace(/\+/g, '-') // Convert '+' to '-'.replace(/\//g, '_') // Convert '/' to '_'.replace(/=+$/, ''); // Remove ending '='
       }
-    }
 
-
-    const encodeUrl = async (url, options, key, salt, extension='') => {
-      const encodedOptions = encodeOptions(options)
-      const encodedUrl = `${encodedOptions}/${urlSafeBase64(url)}${extension ? "."+extension : ""}`
-      const signature = (await generateSignature(encodedUrl, key, salt))        
-        .replace(/\+/g, '-') // Convert '+' to '-'
-        .replace(/\//g, '_') // Convert '/' to '_'
-        .replace(/=+$/, ''); // Remove ending '='
-      return `${signature}${encodedUrl}`
-    }
-
-    const encodeOptions = (options) => {
-      var enc = '/' 
-      for (optionName in options) {
-        args = `${optionName}:`
-        for (opt in options[optionName]) {
-          args = `${args}${options[optionName][opt]}:`
+      function encode() {
+        try {
+          url = document.getElementById("url").value;
+          secret = document.getElementById("secret").value;
+          salt = document.getElementById("salt").value;
+          options = JSON.parse(document.getElementById("options").value.toString());
+          format = document.getElementById("useformat").checked ? document.getElementById("format").value : "";
+          encodeUrl(url, options, secret, salt, format).then(res => {
+            document.getElementById("result").innerHTML = res;
+            document.getElementById("copy").hidden = false;
+          }).catch(err => {
+            document.getElementById("result").innerHTML = err;
+            console.log(err);
+          })
+        } catch (err) {
+          document.getElementById("result").innerHTML = err;
+          console.log(err);
         }
-        enc = enc + args
       }
-      return enc.slice(0,-1)
-    }
+
+
+      const encodeUrl = async (url, options, key, salt, extension = '') => {
+        const encodedOptions = encodeOptions(options);
+        const encodedUrl = `${encodedOptions}/${
+          urlSafeBase64(url)
+        }${
+          extension ? "." + extension : ""
+        }`;
+        const signature = (await generateSignature(encodedUrl, key, salt)).replace(/\+/g, '-'); // Convert '+' to '-'.replace(/\//g, '_') // Convert '/' to '_'.replace(/=+$/, ''); // Remove ending '='
+        return `${signature}${encodedUrl}`;
+      }
+
+      const encodeOptions = (options) => {
+        var enc = '/';
+        for (optionName in options) {
+          args = `${optionName}:`;
+          for (opt in options[optionName]) {
+            args = `${args}${
+              options[optionName][opt]
+            }:`;
+          }
+          enc = enc + args;
+        }
+        return enc.slice(0, -1);
+      }
     </script>
   </body>
 </html>
