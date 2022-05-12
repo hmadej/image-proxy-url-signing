@@ -137,18 +137,21 @@
         return `${signature}${encodedUrl}`;
       }
 
-      const encodeOptions = (options) => {
-        var enc = '/';
-        for (optionName in options) {
-          args = `${optionName}:`;
-          for (opt in options[optionName]) {
-            args = `${args}${
-              options[optionName][opt]
-            }:`;
+      function encodeOptions(options) {
+        const paramSeparator = '/'
+        let enc = ''
+        for (const optionName in options) {
+          if (typeof options[optionName] === 'object') {
+            let args = `${optionName}:`
+            for (const opt in options[optionName]) {
+              args = `${args}${options[optionName][opt]}:`
+            }
+            enc = enc + paramSeparator + args
+          } else {
+            enc = enc.slice(0, -1) + paramSeparator + `${optionName}:${options[optionName]}`
           }
-          enc = enc + args;
         }
-        return enc.slice(0, -1);
+        return enc
       }
     </script>
   </body>
