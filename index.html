@@ -96,7 +96,10 @@
       }
 
       const urlSafeBase64 = (url) => {
-        return window.btoa(unescape(encodeURIComponent(url))).replace(/\+/g, '-') // Convert '+' to '-'.replace(/\//g, '_') // Convert '/' to '_'.replace(/=+$/, ''); // Remove ending '='
+        return window.btoa(unescape(encodeURIComponent(url)))
+          .replace(/\+/g, '-') // Convert '+' to '-'
+          .replace(/\//g, '_') // Convert '/' to '_'
+          .replace(/=+$/, ''); // Remove ending '='
       }
 
       function encode() {
@@ -127,7 +130,10 @@
         }${
           extension ? "." + extension : ""
         }`;
-        const signature = (await generateSignature(encodedUrl, key, salt)).replace(/\+/g, '-'); // Convert '+' to '-'.replace(/\//g, '_') // Convert '/' to '_'.replace(/=+$/, ''); // Remove ending '='
+        const signature = (await generateSignature(encodedUrl, key, salt))
+          .replace(/\+/g, '-') // Convert '+' to '-'
+          .replace(/\//g, '_') // Convert '/' to '_'
+          .replace(/=+$/, ''); // Remove ending '='
         return `${signature}${encodedUrl}`;
       }
 
